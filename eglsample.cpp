@@ -5,16 +5,68 @@
 #include <unistd.h>
 #include "myegl.h"
 
+const char *vshader = R"(
+    attribute vec4 vPosition;
+    void main() {
+        gl_Position = vPosition;
+    }
+)";
+
+const char *fshader = R"(
+    precision mediump float;
+    void main() {
+        gl_FragColor = vec4(0.3, 0.8, 0.3, 1.0);
+    }
+)";
+
+GLuint loadShader(GLenum shaderType, const char *source)
+{
+    GLuint shader = glCreateShader(shaderType);
+    glShaderSource(shader, 1, &source, nullptr);
+    glCompileShader(shader);
+    GLint compiled;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+    return shader;
+}
+
+GLuint createProgram(const char *vshader, const char *fshader)
+{
+    GLuint vertexShader = loadShader(GL_VERTEX_SHADER, vshader);
+    GLuint fragShader = loadShader(GL_FRAGMENT_SHADER, fshader);
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragShader);
+    glLinkProgram(program);
+    GLint linkStatus = GL_FALSE;
+    glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+    return program;
+}
+
+void deleteShaderProgram(GLuint shaderProgram)
+{
+    glDeleteProgram(shaderProgram);
+}
+
 void mainloop(Display *xdisplay, EGLDisplay display, EGLSurface surface)
 {
+    GLuint program = createProgram(vshader, fshader);
+    const GLfloat vertices[] = {0.0f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f};
     while (true)
     {
         XPending(xdisplay);
+
+        GLuint gvPositionHandle = glGetAttribLocation(program, "vPosition");
         glClearColor(0.25f, 0.25f, 0.5f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glUseProgram(program);
+        glEnableVertexAttribArray(gvPositionHandle);
+        glVertexAttribPointer(gvPositionHandle, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
         eglSwapBuffers(display, surface);
+
         usleep(1000);
     }
+    deleteShaderProgram(program);
 }
 
 int main(int argc, char *argv[])
