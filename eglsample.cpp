@@ -11,8 +11,13 @@ GLuint loadShader(GLenum shaderType, const char *source)
     GLuint shader = glCreateShader(shaderType);
     glShaderSource(shader, 1, &source, nullptr);
     glCompileShader(shader);
-    GLint compiled;
+    GLint compiled = GL_FALSE;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+    if (compiled == GL_FALSE)
+    {
+        std::cerr << "Error glCompileShader." << std::endl;
+        exit(EXIT_FAILURE);
+    }
     return shader;
 }
 
@@ -26,6 +31,13 @@ GLuint createProgram(const char *vshader, const char *fshader)
     glLinkProgram(program);
     GLint linkStatus = GL_FALSE;
     glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+    if (linkStatus == GL_FALSE)
+    {
+        std::cerr << "Error glLinkProgram." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragShader);
     return program;
 }
 
@@ -58,7 +70,7 @@ void mainloop(Display *xdisplay, EGLDisplay display, EGLSurface surface)
         XPending(xdisplay);
 
         GLuint gvPositionHandle = glGetAttribLocation(program, "vPosition");
-        glClearColor(0.25f, 0.25f, 0.5f, 0.0f);
+        glClearColor(0.25f, 0.25f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnableVertexAttribArray(gvPositionHandle);
         glVertexAttribPointer(gvPositionHandle, 2, GL_FLOAT, GL_FALSE, 0, vertices);
@@ -116,7 +128,7 @@ void mainloopPng(Display *xdisplay, EGLDisplay display, EGLSurface surface)
     {
         XPending(xdisplay);
 
-        glClearColor(0.25f, 0.25f, 0.5f, 0.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glVertexAttribPointer(texcoord, 2, GL_FLOAT, GL_FALSE, 0, texcoords);
