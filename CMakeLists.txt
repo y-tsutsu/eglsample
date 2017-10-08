@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 add_definitions("-Wall -std=c++11")
-add_definitions("-DLOAD_PNG")
+# add_definitions("-DLOAD_PNG")
 set(CMAKE_BUILD_TYPE Debug)
 add_executable(eglsample
     eglsample.cpp

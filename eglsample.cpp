@@ -3,8 +3,12 @@
 #include <GLES2/gl2.h>
 #include <iostream>
 #include <unistd.h>
+#include <math.h>
+#include <algorithm>
 #include "myegl.h"
 #include "mypng.h"
+
+#define degree2radian(degree) ((degree * M_PI) / 180.0F)
 
 GLuint loadShader(GLenum shaderType, const char *source)
 {
@@ -50,8 +54,9 @@ void mainloop(Display *xdisplay, EGLDisplay display, EGLSurface surface)
 {
     const char *vshader = R"(
         attribute vec4 vPosition;
+        uniform mediump mat4 mRotation;
         void main() {
-            gl_Position = vPosition;
+            gl_Position = mRotation * vPosition;
         }
     )";
 
@@ -65,19 +70,30 @@ void mainloop(Display *xdisplay, EGLDisplay display, EGLSurface surface)
     GLuint program = createProgram(vshader, fshader);
     glUseProgram(program);
     const GLfloat vertices[] = {0.0f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f};
+    GLint gvPositionHandle = glGetAttribLocation(program, "vPosition");
+    glEnableVertexAttribArray(gvPositionHandle);
+    GLint gmRotationHandle = glGetUniformLocation(program, "mRotation");
+    int degree = 0;
     while (true)
     {
         XPending(xdisplay);
 
-        GLuint gvPositionHandle = glGetAttribLocation(program, "vPosition");
+        const GLfloat matrix[] = {
+            static_cast<GLfloat>(cos(degree2radian(degree))), 0.0f, static_cast<GLfloat>(sin(degree2radian(degree))), 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            static_cast<GLfloat>(-sin(degree2radian(degree))), 0.0f, static_cast<GLfloat>(cos(degree2radian(degree))), 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f};
+
         glClearColor(0.25f, 0.25f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnableVertexAttribArray(gvPositionHandle);
+
         glVertexAttribPointer(gvPositionHandle, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+        glUniformMatrix4fv(gmRotationHandle, 1, GL_FALSE, matrix);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         eglSwapBuffers(display, surface);
-        usleep(1000);
+        degree = (degree + 1) % 360;
+        usleep(16600);
     }
     deleteShaderProgram(program);
 }
