@@ -54,24 +54,34 @@ void mainloop(Display *xdisplay, EGLDisplay display, EGLSurface surface)
 {
     const char *vshader = R"(
         attribute vec4 vPosition;
+        attribute vec4 vColor;
+        varying vec4 color;
         uniform mediump mat4 mRotation;
         void main() {
             gl_Position = mRotation * vPosition;
+            color = vColor;
         }
     )";
 
     const char *fshader = R"(
         precision mediump float;
+        varying vec4 color;
         void main() {
-            gl_FragColor = vec4(0.3, 0.8, 0.3, 1.0);
+            gl_FragColor = color;
         }
     )";
 
     GLuint program = createProgram(vshader, fshader);
     glUseProgram(program);
     const GLfloat vertices[] = {0.0f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f};
+    const GLfloat vertex_color[] = {
+        0.0f, 1.0f, 0.0f, 1.0f,
+        1.0f, 0.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f, 1.0f};
     GLint gvPositionHandle = glGetAttribLocation(program, "vPosition");
     glEnableVertexAttribArray(gvPositionHandle);
+    GLint gvColorLocation = glGetAttribLocation(program, "vColor");
+    glEnableVertexAttribArray(gvColorLocation);
     GLint gmRotationHandle = glGetUniformLocation(program, "mRotation");
     int degree = 0;
     while (true)
@@ -88,6 +98,7 @@ void mainloop(Display *xdisplay, EGLDisplay display, EGLSurface surface)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glVertexAttribPointer(gvPositionHandle, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+        glVertexAttribPointer(gvColorLocation, 4, GL_FLOAT, GL_FALSE, 0, vertex_color);
         glUniformMatrix4fv(gmRotationHandle, 1, GL_FALSE, matrix);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
