@@ -127,6 +127,7 @@ void mainloopPng(Display *xdisplay, EGLDisplay display, EGLSurface surface)
         uniform sampler2D texture;
         void main() {
             gl_FragColor = texture2D(texture, texcoordVarying);
+            gl_FragColor.a = 0.5;
         }
     )";
 
@@ -149,14 +150,17 @@ void mainloopPng(Display *xdisplay, EGLDisplay display, EGLSurface surface)
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+
     const float vertices[] = {-1.0f, 1.0f, 0.0f, -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f};
     const float texcoords[] = {0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f};
     while (true)
     {
         XPending(xdisplay);
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(0.25f, 0.25f, 0.5f, 1.0f);
 
         glVertexAttribPointer(texcoord, 2, GL_FLOAT, GL_FALSE, 0, texcoords);
         glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 0, vertices);
