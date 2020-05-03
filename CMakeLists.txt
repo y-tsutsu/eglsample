@@ -9,6 +9,8 @@ if(CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Available build types" FORCE)
 endif()
 
+add_definitions("-DLOAD_PNG")
+
 add_executable(eglsample
     eglsample.cpp
 )
