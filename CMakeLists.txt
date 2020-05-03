@@ -3,6 +3,8 @@ project(eglsample VERSION 0.1.0)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "limited configs" FORCE)
 
+add_definitions("-DLOAD_PNG")
+
 add_executable(eglsample
     eglsample.cpp
 )
