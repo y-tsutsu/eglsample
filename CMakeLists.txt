@@ -7,6 +7,10 @@ add_executable(eglsample
     eglsample.cpp
 )
 
+target_compile_options(eglsample
+    PRIVATE -O2 -Wall
+)
+
 target_compile_features(eglsample
     PRIVATE cxx_std_17
 )
