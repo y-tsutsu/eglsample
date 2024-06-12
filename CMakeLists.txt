@@ -12,7 +12,7 @@ target_compile_options(eglsample
 )
 
 target_compile_features(eglsample
-    PRIVATE cxx_std_17
+    PRIVATE cxx_std_23
 )
 
 find_package(X11 REQUIRED)
