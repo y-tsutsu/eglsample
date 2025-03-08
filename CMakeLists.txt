@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(eglsample VERSION 0.1.0)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "limited configs" FORCE)
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build" FORCE)
+endif()
+
+if(CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Available build types" FORCE)
+endif()
 
 add_executable(eglsample
     eglsample.cpp
